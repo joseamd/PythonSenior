@@ -24,7 +24,7 @@ def registrar_estudiante():
     while edad <= 0:            
         print("La edad debe ser mayor que 0")
         edad = int(input("Ingrese la edad nuevamente: "))
-        
+
     nota1 = registrar_nota(1)
     nota2 = registrar_nota(2)
     nota3 = registrar_nota(3)
@@ -62,6 +62,10 @@ def resumen_final(estudiantes):
     suma_promedio = 0
     promedio_general = 0
 
+    if total_estudiantes == 0:
+        print("No hay estudiantes registrados")
+        return
+
     for prom in estudiantes:
         suma_promedio += prom['promedio']
 
@@ -69,7 +73,7 @@ def resumen_final(estudiantes):
 
     print(f"===== RESUMEN FINAL =====\n"
         f"Total de estudiantes registrados: {total_estudiantes}\n"
-        f"Promedio general por grupo: {promedio_general:.2}\n"
+        f"Promedio general por grupo: {promedio_general:.2f}\n"
         f"Programa finalizado")
     
 
@@ -80,7 +84,6 @@ menu = "===== SISTEMA DE ESTUDIANTES =====\n" \
 
 opcion = 0
 estudiantes = []
-estado = ""
 
 while opcion != 3:
     print(menu)
