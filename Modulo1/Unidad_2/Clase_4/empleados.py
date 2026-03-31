@@ -83,6 +83,10 @@ class Empleado(ABC):
     def calcular_salario(self):
         pass
 
+    def aplicar_aumento(self, porcentaje):
+        self.salario_base += self.salario_base * (porcentaje /100)
+        print(f"Aumento aplicado. Nuevo salario base: {self.salario_base}")
+
 class Gerente(Empleado, Trabajable):
     
     def __init__(self, nombre, salario_base, bono):
@@ -128,5 +132,7 @@ empleados = [
 
 for empleado in empleados:
     empleado.trabajar()
-    print(f"Salario {empleado.calcular_salario()}")
+    print(f"Salario normal: {empleado.calcular_salario()}")
+    empleado.aplicar_aumento(10)
+    print(f"Salario con aumento: {empleado.calcular_salario()}")
     print("-" * 30)
