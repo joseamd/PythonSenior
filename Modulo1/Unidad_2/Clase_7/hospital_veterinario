@@ -1,0 +1,180 @@
+from abc import ABC, abstractmethod
+
+# Clases abstracta Persona y herencia
+class Persona(ABC):
+    def __init__(self, nombre, documento):
+        self.nombre = nombre
+        self.documento = documento
+
+    @abstractmethod
+    def mostrar_rol(self):
+        pass
+
+class Veterinario(Persona):
+    def __init__(self, nombre, documento, especialidad):
+        super().__init__(nombre, documento)
+        self.especialidad = especialidad
+    
+    def mostrar_rol(self):
+        return "Su rol es Veterinario"
+    
+# Clase Mascota    
+class Mascota():
+    def __init__(self, nombre, especie, edad, peso):
+        self.nombre = nombre
+        self.especie = especie
+        self.edad = edad
+        self.peso = peso
+        
+    def mostrar_info(self):
+        return f"Nombre: {self.nombre} - Especie: {self.especie} - Edad: {self.edad} - Peso: {self.peso}"    
+
+# Cliente y agregación con Mascota
+class Cliente(Persona):
+    def __init__(self, nombre, documento, telefono):
+        super().__init__(nombre, documento)
+        self.telefono = telefono
+        self.mascotas = []
+
+    def mostrar_rol(self):
+        return "Su rol es Cliente"
+    
+    def agregar_mascota(self, mascota):
+        self.mascotas.append(mascota)
+
+    def mostrar_mascotas(self):
+        for mascota in self.mascotas:
+            print(mascota.mostrar_info())
+
+# Clase Recepcionista 
+class Recepcionista(Persona):
+    def __init__(self, nombre, documento):
+        super().__init__(nombre, documento)
+
+    def mostrar_rol(self):
+        return "Su rol es Recepcionista"
+    
+    def registrar_cliente(self, nombre, documento, telefono):
+        cliente = Cliente(nombre, documento, telefono)
+        return cliente        
+
+# Clase Tratamiento
+class Tratamiento:
+    def __init__(self, nombre, costo, duracion_dias):
+        self.nombre = nombre
+        self.costo = costo
+        self.duracion_dias = duracion_dias
+
+    def mostrar_tratamiento(self):
+        return (f"Nombre: {self.nombre} - Costo = ${self.costo:,.0f} - Duración Días: {self.duracion_dias}")
+
+#Consulta y composición con Tratamiento
+class Consulta:
+    def __init__(self, mascota, veterinario, motivo, diagnostico):
+        self.mascota = mascota
+        self.veterinario = veterinario
+        self.motivo = motivo
+        self.diagnostico = diagnostico
+        self.tratamientos = []
+
+    def crear_tratamiento(self, tratamiento):
+        self.tratamientos.append(tratamiento)
+
+    def mostrar_resumen(self):
+        print("─" * 60)
+        print(f"Resumen de la Consulta del paciente {self.mascota.nombre}")
+        print(f"Tratamiento")
+        for tratamiento in self.tratamientos:
+            print(f"{tratamiento.mostrar_tratamiento()}")
+        print("─" * 60)
+
+    def calcular_costo_consulta(self):
+        return sum(tratamiento.costo for tratamiento in self.tratamientos)
+
+
+# Clases abstracta MetodoPago y herencia
+class MetodoPago(ABC):
+    
+    @abstractmethod
+    def procesar_pago(self, monto):
+        pass
+
+class PagoEfectivo(MetodoPago):
+    def procesar_pago(self, monto):
+        return f"Pago en efectivo procesado por ${monto:,.0f}."
+
+class PagoTarjeta(MetodoPago):
+    def procesar_pago(self, monto):
+        return f"Pago con Tarjeta procesado por ${monto:,.0f}."
+
+class PagoTransferencia(MetodoPago):
+    def procesar_pago(self, monto):
+        return f"Pago por Transferencia procesado por ${monto:,.0f}."
+
+# Clase Factura
+class Factura:
+    def __init__(self, consulta):
+        self.consulta = consulta
+        self.subtotal = 0
+        self.impuesto = 0.19
+        self.total = 0
+
+    def calcular_total(self):
+        self.subtotal = self.consulta.calcular_costo_consulta() 
+        self.total = self.subtotal + (self.subtotal * self.impuesto)
+        return self.total
+
+    def pagar(self, metodo_pago: MetodoPago):
+        total = self.calcular_total()
+        return metodo_pago.procesar_pago(total)
+    
+    def mostrar_factura(self):
+        print(f"Subtotal: ${self.subtotal:,.0f}")
+        print(f"IVA (19%): ${self.subtotal * self.impuesto:,.0f}")
+        print(f"Total: ${self.total:,.0f}")
+    
+
+if __name__ == "__main__":
+
+    # 1. Creamos una Recepcionista y cliente
+    recepcionista = Recepcionista("Ana", "1234")
+    cliente = recepcionista.registrar_cliente("Alex", "9453", "3172733233")
+
+    # 2. Registramos dos mascotas
+    mascota1 = Mascota("Firulais", "Perro", 5, 10)
+    mascota2 = Mascota("Tom", "Gato", 3, 4)
+
+    cliente.agregar_mascota(mascota1)
+    cliente.agregar_mascota(mascota2)
+
+    # 3. Creamos un veterinario
+    veterinario = Veterinario("Dr. Carlos", "4213", "Cirugía")
+
+    # 4. Creamos una consulta
+    consulta = Consulta(mascota1, veterinario, "Dolor", "Infección")
+
+    # 5. La consulta genera dos tratamientos
+    t1 = Tratamiento("Antibiótico", 50000, 5)
+    t2 = Tratamiento("Vitaminas", 30000, 10)
+
+    consulta.crear_tratamiento(t1)
+    consulta.crear_tratamiento(t2)
+
+    # Mostrar Resumen
+    consulta.mostrar_resumen()
+
+    # 6. Generar factura y calcular total
+    factura = Factura(consulta)
+    factura.calcular_total()
+    factura.mostrar_factura()
+
+    # 7. Se paga con un método de pago
+    pago1 = PagoEfectivo()
+    print(factura.pagar(pago1))
+    print("─" * 60)
+
+    # 8. Se cambia el método de pago
+    pago2 = PagoTarjeta()
+    print("Cambió método de pago")
+    print(factura.pagar(pago2))
+    print("─" * 60)
