@@ -18,6 +18,9 @@ class Veterinario(Persona):
     def mostrar_rol(self):
         return "Su rol es Veterinario"
     
+    def atender_mascota(self, mascota):
+        return f"El veterinario {self.nombre} está atendiendo a {mascota.nombre}"
+    
 # Clase Mascota    
 class Mascota():
     def __init__(self, nombre, especie, edad, peso):
@@ -82,8 +85,9 @@ class Consulta:
 
     def mostrar_resumen(self):
         print("─" * 60)
-        print(f"Resumen de la Consulta del paciente {self.mascota.nombre}")
-        print(f"Tratamiento")
+        print(f"-------Resumen de la Consulta-------")
+        print(f"Paciente: {self.mascota.nombre}")
+        print(f"Tratamientos:")
         for tratamiento in self.tratamientos:
             print(f"{tratamiento.mostrar_tratamiento()}")
         print("─" * 60)
@@ -129,6 +133,7 @@ class Factura:
         return metodo_pago.procesar_pago(total)
     
     def mostrar_factura(self):
+        print(f"-------Factura-------")
         print(f"Subtotal: ${self.subtotal:,.0f}")
         print(f"IVA (19%): ${self.subtotal * self.impuesto:,.0f}")
         print(f"Total: ${self.total:,.0f}")
@@ -149,6 +154,7 @@ if __name__ == "__main__":
 
     # 3. Creamos un veterinario
     veterinario = Veterinario("Dr. Carlos", "4213", "Cirugía")
+    print(veterinario.atender_mascota(mascota1))
 
     # 4. Creamos una consulta
     consulta = Consulta(mascota1, veterinario, "Dolor", "Infección")
@@ -175,6 +181,6 @@ if __name__ == "__main__":
 
     # 8. Se cambia el método de pago
     pago2 = PagoTarjeta()
-    print("Cambió método de pago")
+    print("Cambio de método de pago a tarjeta:")
     print(factura.pagar(pago2))
     print("─" * 60)
