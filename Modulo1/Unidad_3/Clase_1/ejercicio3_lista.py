@@ -8,7 +8,6 @@ Buscar estudiante — el usuario escribe un nombre y el programa dice si está r
 Salir
 """
 estudiantes = []
-opcion = 0
 
 menu ="=== REGISTRO DE CALIFICACIONES ===\n" \
 "1. Agregar estudiante \n" \

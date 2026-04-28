@@ -9,7 +9,6 @@ Salir
 """
 
 productos = []
-opcion = 0
 
 menu = "=== LISTA DE COMPRAS === \n" \
 " 1. Agregar producto \n" \

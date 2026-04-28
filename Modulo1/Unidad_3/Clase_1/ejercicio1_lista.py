@@ -5,7 +5,6 @@ hasta que ingrese -1 para finalizar.
 Luego, mostrar el promedio de notas ingresadas.
 """
 notas = []
-opcion = 0
 
 menu = """
 ===========================
