@@ -20,14 +20,20 @@ class GestionEstudiante:
         self.estudiantes = {}
 
     def mostrar_menu(self):
-        print("=== Sistema de Gestión de Estudiantes ===")
-        print("1. Agregar estudiante")
-        print("2. Agregar calificaciones")
-        print("3. Calcular promedio de un estudiante")
-        print("4. Mostrar todos los estudiantes con sus promedios")
-        print("5. Encontrar el estudiante con el promedio más alto")
-        print("6. Eliminar un estudiante")
-        print("7. Salir")
+        menu = """
+            ========================================
+            SISTEMA DE GESTIÓN DE ESTUDIANTES
+            ========================================
+            1. Agregar estudiante
+            2. Agregar calificaciones
+            3. Calcular promedio de un estudiante
+            4. Mostrar todos los estudiantes con sus promedios
+            5. Encontrar el estudiante con el promedio más alto
+            6. Eliminar un estudiante
+            7. Salir
+            ========================================
+            """
+        print(menu)
 
     def agregar_estudiante(self, codigo, nombre, apellido):
         if codigo in self.estudiantes:
