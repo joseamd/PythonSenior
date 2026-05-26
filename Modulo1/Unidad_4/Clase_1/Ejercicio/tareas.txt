@@ -1,0 +1,5 @@
+[ ] Estudiar manejo de archivos en Python
+[ ] Comprar materiales para clase
+[ ] Revisar ejercicios pendientes
+[ ] Hacer tarea de python
+[x] lavar la losa
