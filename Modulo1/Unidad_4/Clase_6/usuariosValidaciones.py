@@ -41,11 +41,32 @@ def mostrar_menu():
             2. Mostrar usuarios
             3. Buscar usuario
             4. Validar archivo
-            5. Procesar archivo con errores          
-            6. Salir
+            5. Procesar archivo con errores
+            6. Eliminar usuario
+            7. Edad promedio 
+            8. Ordenar Usuarios         
+            9. Salir
             ========================================
             """
         print(menu)
+
+def leer_archivo():
+    try:
+        with open(ARCHIVO, "r", encoding="utf-8") as archivo:
+            lineas = archivo.readlines()
+            if not lineas:
+                print("No hay usuarios registrados.")
+                return []
+            return lineas
+    except FileNotFoundError:
+        print("No se encontró el archivo de usuarios.")
+        return []
+    except PermissionError:
+        print("No tienes permisos para leer el archivo.")
+        return []
+    except Exception as error:
+        print(f"Ocurrió un error inesperado: {error}")
+        return []
 
 def registrar_usuario():
     nombre = input("Ingrese el nombre del usuario: ").strip().lower()
@@ -87,28 +108,24 @@ def registrar_usuario():
 
 def mostrar_usuarios():
     print("== Lista de Usuarios ==\n")
-    try:
-        with open(ARCHIVO, "r", encoding="utf-8") as archivo:
-            lineas = archivo.readlines()
-            if not lineas:
-                print("No hay usuarios registrados.")
-                return
-            
-            for linea in lineas:
-                partes = linea.strip().split(",")
-                # Verificar que la línea tenga el formato correcto
-                if len(partes) == 3:
-                    nombre, edad, fecha = partes
-                    print(f"Nombre: {nombre}, Edad: {edad}, Fecha: {fecha}")    
-                else:
-                    print(f"\nLínea con formato incorrecto: {linea.strip()}")     
-            
-    except FileNotFoundError:
-        print("No se encontró el archivo de usuarios.")
-    except PermissionError:
-        print("No tienes permisos para leer el archivo.")
-    except Exception as error:
-        print(f"Ocurrió un error inesperado: {error}")
+
+    # leer archivo
+    lineas = leer_archivo()
+    if not lineas:
+        return
+    
+    total_usuarios = 0
+    for linea in lineas:
+        partes = linea.strip().split(",")
+        # Verificar que la línea tenga el formato correcto
+        if len(partes) == 3:
+            nombre, edad, fecha = partes
+            print(f"Nombre: {nombre}, Edad: {edad}, Fecha: {fecha}")    
+            total_usuarios += 1
+        else:
+            print(f"\nLínea con formato incorrecto: {linea.strip()}")    
+
+    print(f"\nTotal de usuarios correctamente registrados: {total_usuarios}")     
 
 def buscar_usuario():
     busqueda = input("Ingrese el nombre del usuario a buscar: ").strip().lower()
@@ -119,28 +136,18 @@ def buscar_usuario():
 
     encontrados = []
 
-    try:
-        with open(ARCHIVO, "r", encoding="utf-8") as archivo:
-            lineas = archivo.readlines()
-
-            if not lineas:
-                print("No hay usuarios registrados.")
-                return            
-            
-            # Buscar coincidencias ignorando mayúsculas y minúsculas
-            for linea in lineas:
-                partes = linea.strip().split(",")
-                if len(partes) == 3:
-                    nombre_archivo, edad, fecha = partes
-                    if nombre_archivo.lower() == busqueda:
-                        encontrados.append({"nombre": nombre_archivo, "edad": edad, "fecha": fecha})   
-            
-    except FileNotFoundError:
-        print("No se encontró el archivo de usuarios.")
-    except PermissionError:
-        print("No tienes permisos para leer el archivo.")
-    except Exception as error:
-        print(f"Ocurrió un error inesperado: {error}")    
+    # leer archivo
+    lineas = leer_archivo()
+    if not lineas:
+        return
+    
+    # Buscar coincidencias ignorando mayúsculas y minúsculas
+    for linea in lineas:
+        partes = linea.strip().split(",")
+        if len(partes) == 3:
+            nombre_archivo, edad, fecha = partes
+            if nombre_archivo.lower() == busqueda:
+                encontrados.append({"nombre": nombre_archivo, "edad": edad, "fecha": fecha})  
     
     if encontrados:
         print("\n-- Usuarios Encontrados --")
@@ -250,8 +257,112 @@ def procesar_archivos():
     except PermissionError:
         print("No tienes permisos para escribir los archivos.")
     except OSError as error:
-        print(f"Error al guardar los archivos: {error}")    
+        print(f"Error al guardar los archivos: {error}")   
+
+def eliminar_usuario():
+    busqueda = input("Ingrese el nombre del usuario a eliminar: ").strip().lower()
+
+    if not busqueda:
+        print("Debe ingresar un nombre para eliminar.")
+        return
     
+    # Filtrar todas las líneas excepto la del usuario a eliminar
+    nuevas_lineas = []
+    eliminado = False 
+
+    # leer archivo
+    lineas = leer_archivo()
+    if not lineas:
+        return
+    
+    for linea in lineas:
+        partes = linea.strip().split(",")
+        if len(partes) == 3 and partes[0].lower() == busqueda:
+            eliminado = True  # encontramos al usuario
+        else:
+            nuevas_lineas.append(linea)  # conservamos las demás    
+
+    if eliminado:
+        try:
+            with open(ARCHIVO, "w", encoding="utf-8") as archivo:
+                archivo.writelines(nuevas_lineas)
+            print(f"Usuario '{busqueda}' eliminado correctamente.")
+        except PermissionError:
+            print("No tienes permisos para modificar el archivo.")
+        except OSError as error:
+            print(f"Error al guardar los cambios: {error}")
+    else:
+        print("No se encontró un usuario con ese nombre.")
+
+def calcular_edad_promedio():
+    print("== Edad promedio de Usuarios ==\n")
+
+    # leer archivo
+    lineas = leer_archivo()
+    if not lineas:
+        return
+    
+    suma_edades = 0
+    total_usuarios = 0
+    for linea in lineas:
+        partes = linea.strip().split(",")
+        # Solo procesar líneas con formato correcto
+        if len(partes) == 3:
+            nombre, edad, fecha = partes
+            try:
+                suma_edades += int(edad)    # convertir a entero para sumar
+                total_usuarios += 1
+            except ValueError:
+                print(f"Línea con edad inválida ignorada: {linea.strip()}")             
+        else:
+            print(f"\nLínea con formato incorrecto: {linea.strip()}")    
+
+    # Evitar división por cero si no hay usuarios válidos
+    if total_usuarios == 0:
+        print("No hay usuarios válidos para calcular el promedio.")
+        return
+    
+    promedio = suma_edades / total_usuarios
+    print(f"\nEl promedio de edad de los usuarios registrados es: {promedio:.1f} años")  
+
+def ordenar_usuarios():
+    # leer archivo
+    lineas = leer_archivo()
+    if not lineas:
+        return
+    
+    # mostrar submenú y ordenar
+    print("\n== Ordenar Usuarios ==")
+    print("1. Nombre")
+    print("2. Edad")
+    opcion = input("¿Ordenar por: ")
+
+    match opcion:
+        case "1":
+            lineas_ordenadas = sorted(lineas, key=lambda l: l.split(",")[0])
+            print("-" * 60)
+
+        case "2":
+            try:
+                lineas_ordenadas = sorted(lineas, key=lambda l: int(l.split(",")[1]))
+            except ValueError:
+                print("No se puede ordenar por edad: hay líneas con edad inválida.")
+                return
+            print("-" * 60)
+            
+        case _:
+            print("Opción inválida")
+            return
+
+    # imprimir resultado
+    print("\n-- Usuarios Ordenados --")
+    for linea in lineas_ordenadas:
+        partes = linea.strip().split(",")
+        if len(partes) == 3:
+            nombre, edad, fecha = partes
+            print(f"Nombre: {nombre}, Edad: {edad}, Fecha: {fecha}")
+        else:
+            print(f"Línea con formato incorrecto: {linea.strip()}")       
 
 def main():    
 
@@ -285,9 +396,21 @@ def main():
 
             case 5:
                 procesar_archivos()
-                print("-" * 60)     
+                print("-" * 60)    
 
             case 6:
+                eliminar_usuario()
+                print("-" * 60)    
+
+            case 7:
+                calcular_edad_promedio()
+                print("-" * 60) 
+
+            case 8:
+                ordenar_usuarios()
+                print("-" * 60) 
+
+            case 9:
                 print("¡Hasta luego!")
                 break
 
