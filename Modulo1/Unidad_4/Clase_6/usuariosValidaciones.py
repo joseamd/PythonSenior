@@ -27,6 +27,7 @@ Registrar fecha y hora de creación. Modificar la opcion 1 para registrar la fec
 
 from datetime import datetime
 
+# Archivos de datos
 ARCHIVO = "usuarios.txt"
 ARCHIVO_BUENOS = "usuarios_validos.txt"
 ARCHIVO_MALOS = "usuarios_invalidos.txt"
@@ -63,6 +64,18 @@ def registrar_usuario():
         print("La edad debe estar entre 0 y 120 años.")
         return
     
+    # Verificar que no exista un usuario con el mismo nombre
+    try:
+        with open(ARCHIVO, "r", encoding="utf-8") as archivo:
+            for linea in archivo:
+                partes = linea.strip().split(",")
+                if len(partes) >= 2 and partes[0].lower() == nombre:
+                    print("Ya existe un usuario con ese nombre.")
+                    return
+    except FileNotFoundError:
+        pass
+    
+    # Guardar el usuario con fecha y hora de registro
     try:
         with open(ARCHIVO, "a", encoding="utf-8") as archivo:
             archivo.write(f"{nombre},{edad},{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")    
@@ -83,11 +96,12 @@ def mostrar_usuarios():
             
             for linea in lineas:
                 partes = linea.strip().split(",")
+                # Verificar que la línea tenga el formato correcto
                 if len(partes) == 3:
                     nombre, edad, fecha = partes
                     print(f"Nombre: {nombre}, Edad: {edad}, Fecha: {fecha}")    
                 else:
-                    print(f"Línea con formato incorrecto: {linea.strip()}")     
+                    print(f"\nLínea con formato incorrecto: {linea.strip()}")     
             
     except FileNotFoundError:
         print("No se encontró el archivo de usuarios.")
@@ -113,6 +127,7 @@ def buscar_usuario():
                 print("No hay usuarios registrados.")
                 return            
             
+            # Buscar coincidencias ignorando mayúsculas y minúsculas
             for linea in lineas:
                 partes = linea.strip().split(",")
                 if len(partes) == 3:
@@ -138,8 +153,8 @@ def validar_archivo():
     print("== Validación de Archivos ==\n")
 
     errores = 0
-    usuarios = []
-    invalidos = []
+    usuarios = []   # lineas válidas
+    invalidos = []  # líneas con errores y su motivo
 
     try:
         with open(ARCHIVO, "r", encoding="utf-8") as archivo:
@@ -160,36 +175,42 @@ def validar_archivo():
 
     for i, linea in enumerate(lineas, start=1):
         partes = linea.strip().split(",")
-        usuario_valido = True
+        usuario_valido = True   # se asume válido hasta encontrar un error
 
+        # Validar que tenga exactamente 3 campos
         if len(partes) != 3:
             print(f"Línea {i}: formato incorrecto: {linea.strip()}")
             errores += 1
-            invalidos.append(linea.strip())
-            continue  
+            invalidos.append(f"{linea.strip()} → formato incorrecto")
+            continue
 
+        # Desempaquetar los campos
         nombre, edad, fecha = partes
 
+        # Validar nombre no vacío
         if not nombre.strip():
             print(f"Línea {i}: nombre vacío.")
             errores += 1
+            invalidos.append(f"{linea.strip()} → nombre vacío")
             usuario_valido = False
 
+        # Validar que edad sea numérica y esté en rango 
         try:
             edad_int = int(edad)
             if edad_int < 0 or edad_int > 120:
-                print(f"Línea {i}: edad fuera de rango: {edad}")
+                print(f"Línea {i}: edad fuera de rango →  {edad}")
                 errores += 1
+                invalidos.append(f"{linea.strip()} → edad fuera de rango")
                 usuario_valido = False
         except ValueError:
-            print(f"Línea {i}: edad no es un número: {edad}")
+            print(f"Línea {i}: edad no es un número → {edad}")
             errores += 1
+            invalidos.append(f"{linea.strip()} → edad no es un número")
             usuario_valido = False
 
+        # Si pasó todas las validaciones, se agrega a la lista de válidos llamada usuarios
         if usuario_valido:
             usuarios.append(linea.strip())
-        else:
-            invalidos.append(linea.strip())
 
     # Resumen final
     if errores == 0:
@@ -198,13 +219,14 @@ def validar_archivo():
         print(f"\nSe encontraron {errores} errores.")
     
     print(f"Usuarios válidos: {len(usuarios)}")
-    print(f"Usuarios inválidos: {len(invalidos)}")
+    print(f"Usuarios inválidos: {len(invalidos)} \n")
 
     return usuarios, invalidos
 
 def procesar_archivos():
     print("== Procesador de Archivos ==\n")
 
+    # Reutilizar la lógica de validación
     usuarios, invalidos = validar_archivo()    
 
     if not usuarios and not invalidos:
@@ -212,17 +234,19 @@ def procesar_archivos():
         return
     
     try:
+        # Guardar registros válidos
         if usuarios:
             with open(ARCHIVO_BUENOS, "w", encoding="utf-8") as archivo:
                 for linea in usuarios:
                     archivo.write(linea + "\n")
-            print(f"Archivo de válidos guardado: {len(usuarios)} usuarios.")
+            print(f"Archivo de válidos guardado correctamente con: {len(usuarios)} usuarios.")
 
+        # Guardar registros inválidos con el motivo del error
         if invalidos:
             with open(ARCHIVO_MALOS, "w", encoding="utf-8") as archivo:
                 for linea in invalidos:
                     archivo.write(linea + "\n")
-            print(f"Archivo de inválidos guardado: {len(invalidos)} registros.")
+            print(f"Archivo de inválidos guardado correctamente con: {len(invalidos)} registros.")
     except PermissionError:
         print("No tienes permisos para escribir los archivos.")
     except OSError as error:
@@ -235,6 +259,7 @@ def main():
         mostrar_menu()
         opcion = input("Ingrese una opción: ")
 
+        # Validar que la opción sea un número
         try:
             opcion = int(opcion)
         except ValueError:
